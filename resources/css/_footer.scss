@@ -1,0 +1,72 @@
+
+/**
+ *     "footer-bottom">
+ *          |---"footer-txt">
+ *          |---"footer-menu"
+*/
+
+// div is used: /templates/footer.php
+#footer-main {
+  position: relative;
+  width: 100%;
+  background: rgba(220, 220, 225, 0.4);
+  color: rgba(9, 0, 0, 0.38);
+  margin: 0;
+  padding: 0;
+  height: 150px;
+  //box-shadow: 0 0 6px 0 $box-shadow-color;
+  //border: solid 1px black;
+  //z-index: 200;
+
+  #f-block-l {
+    position: absolute;
+    width: 50%;
+    //border: 1px solid black;
+
+    .f-menu-l {
+      padding: 15px 20px 5px 15%;
+      margin: 0 0 0 20%;
+      font-style: italic;
+      font-size: 1em;
+      color: rgba(9, 0, 0, 0.38);
+    }
+  }
+
+  #f-block-m {
+    @extend #f-block-l;
+    left: 50%;
+    //border: 1px solid black;
+
+    .f-menu-m {
+      padding: 15px 20px 5px 20px;
+      margin: 0 0 0 50%;
+      font-style: italic;
+      font-size: 0.9em;
+      color: rgba(9, 0, 0, 0.38);
+    }
+  }
+
+  #f-block-r {
+    @extend #f-block-l;
+    left: 70%;
+    //border: 1px solid black;
+
+    #f-menu-r {
+      padding: 20px 0 0 20px;
+      margin-left: 6%;
+      font-style: italic;
+      font-size: 0.8em;
+      color: rgba(9, 0, 0, 0.38);
+    }
+  }
+
+  a {
+    text-decoration: none;
+    color: rgba(9, 0, 0, 0.38);
+
+    &:hover {
+      text-decoration: underline;
+      color: rgba(9, 0, 0, 0.38);
+    }
+  }
+}

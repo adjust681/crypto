@@ -3,8 +3,8 @@ namespace crypto\includ\config;
 class Config
 {
     const MYSQL_DSN = 'mysql:host=localhost;dbname=price;charset=utf8';
-    const MYSQL_USER = 'watson';
-    const MYSQL_PASSWORD = '18881888Az#@';
+    const MYSQL_USER = 'xxxxxxxx';
+    const MYSQL_PASSWORD = 'xxxxxxxx';
     const MYSQL_DB_NAME = 'price';
     const MYSQL_TABLE_NAME = 'history_price';
     const MYSQL_HOST = 'localhost';

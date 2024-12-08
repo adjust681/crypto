@@ -1,5 +1,4 @@
 <?php
-include_once __DIR__ . '/include/general_inc.php';
 include_once __DIR__ . '/include/Settings.php';
 use crypto\includ\setting\Settings;?>
 <!DOCTYPE HTML>

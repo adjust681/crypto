@@ -1,32 +1,51 @@
-let id_list = [];
+
+/*
+ * variables init value into index.php
+ */
+let id_list= [];
 let ticket_list = [];
-let api_url = '';
-let refreshTime = 30000;
+let api_url= '';
+
+/**
+ * used in refreshPage(refreshTime);
+ * second format
+ * @type {number}
+ */
+let refreshTime= 60*10;
+
+/**
+ * used in stopTimer(timer);
+ * @type {number}
+ */
+let timer      = 0;
+
+let _sharp           = '#';
+let tag_inform       = ' inf';
+let tag_price        = ' prc';
+let tag_percent      = ' pr';
+let tag_time         = '-tm';
+let tag_minute       = '#min';
+let tag_second       = '#sec';
+let tag_compute_icon = '-cm';
+let tag_fixprice_icon= '-fx';
 
 let timing = {
-    min: 'мин.', hour1: 'час', hour2: 'часа', hour3: 'часов',
-    day1: 'день', day2: 'дня', day3: 'дней', month: ' более 1 мес.'
+    min: 'мин.', hour: ['час', 'часа', 'часов'], day: ['день', 'дня', 'дней'], month: ' более мес.'
 };
-
-let tag_inform   = ' inf';
-let tag_price    = ' prc';
-let tag_percent  = ' pr';
-let tag_time     = '-tm';
-let tag_conpute_icon  = '-cm';
-let tag_fixprice_icon = '-fx';
 
 $(document).ready(function () {
 
     computeAllPrice();
+    refreshPage(refreshTime);
 
     // region set listener from array ticket
 
     for(let i=0; i<ticket_list.length; i++) {
-        let _id = '#' + id_list[i];
+        let _id = _sharp + id_list[i];
         let _ticket = ticket_list[i];
 
         //button 'compute' individually
-        $(_id + tag_conpute_icon).click(function () {
+        $(_id + tag_compute_icon).click(function () {
             updateTicker(_id, _ticket);
         });
 
@@ -40,24 +59,23 @@ $(document).ready(function () {
 
     // endregion set listener from array ticket
 
-    // region 3 button bottom list
-
-    //button 'Update all'
-    $('#updateall').click(function () {
-        updateAllPrice();
-    });
+    // region button bottom list
 
     //button 'Compute all'
     $('#computeall').click(function () {
         computeAllPrice();
+        stopTimer(timer);
+        refreshPage(refreshTime);
     });
 
     //button 'Fixprice all'
     $('#fixpriceall').click(function () {
         fixAllPrice();
+        stopTimer(timer);
+        refreshPage(refreshTime);
     });
 
-    // endregion 3 button bottom list
+    // endregion button bottom list
 
     // region update display
 
@@ -69,6 +87,9 @@ $(document).ready(function () {
     function updateTicker(id, ticket){
         updateTickerGet(id, ticket).done(function (data) {
             let _newprice = data.price;
+            _newprice = pricePrepare(_newprice);
+            $(id + tag_inform).text('');
+            $(id + tag_price).text(_newprice);
 
             getDataBase(ticket).done(function (data) {
                 const _data = data.split('|');
@@ -94,6 +115,17 @@ $(document).ready(function () {
 
     /**
      * call in updateTicker()
+     * @param price
+     * @returns {string}
+     */
+    function pricePrepare(price) {
+        let numberCount = n => 1 + Math.max(Math.floor(Math.log10(Math.abs(n))), 0);
+        let ncount = 8 - numberCount(price) + 1;
+        return parseFloat(price).toFixed(ncount);
+    }
+
+    /**
+     * call in updateTicker()
      * @param id
      * @param ticket
      * @param timeout
@@ -109,47 +141,8 @@ $(document).ready(function () {
                 $(id + tag_inform).text('request...');
             },
             success: function (response) {
-                $(id + tag_inform).text('');
-                $(id + tag_price).text(response.price);
             }
         });
-    }
-
-    /**
-     * call in getAllPrice()
-     * @param id
-     * @param ticket
-     * @returns {Promise<void>}
-     */
-    async function updateTickerMultiple(id, ticket) {
-        var timerId = setInterval(function () {
-            $.ajax({
-                url: api_url + ticket,
-                method: "GET",
-                timeout: 0,
-                beforeSend: function () {
-                    $(id + tag_price).text('');
-                    $(id + tag_inform).text('request...');
-                    $('#updateall').val('Waiting');
-                },
-                success: function (response) {
-                    $(id + tag_inform).text('');
-                    $(id + tag_price).text(response.price);
-                    $('#updateall').val('Update all');
-                    clearInterval(timerId);
-                }
-            });
-        }, 50)
-    }
-
-    /**
-     * used for click button 'Update all'
-     */
-    function updateAllPrice(){
-        for(var i=0; i<ticket_list.length;) {
-            updateTickerMultiple('#' + id_list[i], ticket_list[i]);
-            i++;
-        }
     }
 
     /**
@@ -157,7 +150,7 @@ $(document).ready(function () {
      */
     function computeAllPrice(){
         for(let i=0; i<ticket_list.length; i++) {
-            let _id = '#' + id_list[i];
+            let _id = _sharp + id_list[i];
             let _ticket = ticket_list[i];
             updateTicker(_id, _ticket);
         }
@@ -168,7 +161,7 @@ $(document).ready(function () {
      */
     function fixAllPrice(){
         for(let i=0; i<ticket_list.length; i++) {
-            let _id = '#' + id_list[i];
+            let _id = _sharp + id_list[i];
             let _ticket = ticket_list[i];
             let _price = $(_id + tag_price).text();
             sendDataBase(_ticket, _price);
@@ -191,10 +184,8 @@ $(document).ready(function () {
             method: "POST",
             data: { post: 'true', ticket: ticket, price: price },
             success: function (response) {
-                //console.log('response: '+ response);
             },
             error: function (error) {
-                //console.log('error: ', error);
             }
         });
     }
@@ -210,10 +201,8 @@ $(document).ready(function () {
             method: "GET",
             data: { get: 'true', ticket: ticket },
             success: function (response) {
-                //console.log('response: ', response);
             },
             error: function (error) {
-                //console.log('getDataBase.error: ', error);
             }
         });
     }
@@ -224,19 +213,14 @@ $(document).ready(function () {
 
     /**
      * used in the button 'compute' individually
-     * @param savprice
+     * @param saveprice
      * @param newprice
      * @returns {string}
      */
-    function comparePrice(savprice, newprice) {
-        let _savprice = parseFloat(savprice);
+    function comparePrice(saveprice, newprice) {
+        let _saveprice = parseFloat(saveprice);
         let _newprice = parseFloat(newprice);
-        var percentComplete = (((_newprice - _savprice) / _newprice) * 100).toFixed(2);
-
-        //console.log('comparePrice._savprice: ' + _savprice);
-        //console.log('comparePrice._newprice: ' + _newprice);
-        //console.log('percentComplete: ' + percentComplete + '%');
-        return percentComplete;
+        return (((_newprice - _saveprice) / _newprice) * 100).toFixed(2);
     }
 
     /**
@@ -249,7 +233,6 @@ $(document).ready(function () {
         let out = '';
         let _newtime = parseInt(parseFloat(Date.now() / 1000).toFixed(0));
         let _subtract  = _newtime - savetime;
-        //console.log('subtract: ', _subtract); //5860
 
         if(_subtract < 3600) {
             let _minute = parseInt(parseFloat(_subtract / 60).toString().split('.')[0]);
@@ -257,19 +240,19 @@ $(document).ready(function () {
         }else if (_subtract < 3600*24) {
             let _hour = parseInt(parseFloat(_subtract / 3600).toString().split('.')[0]);
             if (_hour < 2 || (_hour >= 21 && _hour < 22))
-                out = _hour + ' ' + timing.hour1;
+                out = _hour + ' ' + timing.hour[0];
             else if ((_hour >= 2 && _hour < 5) || (_hour >= 22 && _hour < 24))
-                out = _hour + ' ' + timing.hour2;
+                out = _hour + ' ' + timing.hour[1];
             else if (_hour >= 5 && _hour < 21)
-                out = _hour + ' ' + timing.hour3;
+                out = _hour + ' ' + timing.hour[2];
         }else if(_subtract >= 3600*24) {
             let _day = parseInt(parseFloat(_subtract / 3600*24).toString().split('.')[0]);
             if((_day >= 1 && _day < 2) || (_day >= 21 && _day < 22))
-                out = _day + ' ' + timing.day1;
+                out = _day + ' ' + timing.day[0];
             else if((_day >= 2 && _day < 5) || (_day >= 22 && _day < 24) || _day === 31)
-                out = _day + ' ' + timing.day2;
+                out = _day + ' ' + timing.day[1];
             else if((_day >= 5 && _day < 21) || (_day >= 25 && _day < 30))
-                out = _day + ' ' + timing.day3;
+                out = _day + ' ' + timing.day[2];
             else if(_day > 31)
                 out = ' ' + timing.month;
         }else {
@@ -279,5 +262,31 @@ $(document).ready(function () {
     }
 
     // endregion compute percent, date
+
+    //region Timer / refresh page
+
+    function refreshPage(refreshTime) {
+        let countdown = refreshTime;
+        function t(){
+            countdown--;
+            let minutes = Math.floor(countdown / 60);
+            let seconds = countdown - minutes * 60;
+            $(tag_minute).text(minutes);
+            $(tag_second).text(seconds);
+            if(!countdown) {
+                clearInterval(timer);
+                window.location.reload(1);
+            }
+        }
+        timer = setInterval(t, 1000);
+    }
+
+    function stopTimer(timer) {
+            $(tag_minute).text('-');
+            $(tag_second).text('-');
+            clearInterval(timer);
+    }
+
+    //endregion Timer / refresh page
 
 });

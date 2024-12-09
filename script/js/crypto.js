@@ -246,7 +246,7 @@ $(document).ready(function () {
             else if (_hour >= 5 && _hour < 21)
                 out = _hour + ' ' + timing.hour[2];
         }else if(_subtract >= 3600*24) {
-            let _day = parseInt(parseFloat(_subtract / 3600*24).toString().split('.')[0]);
+            let _day = parseInt(parseFloat(_subtract / (3600*24)).toString().split('.')[0]);
             if((_day >= 1 && _day < 2) || (_day >= 21 && _day < 22))
                 out = _day + ' ' + timing.day[0];
             else if((_day >= 2 && _day < 5) || (_day >= 22 && _day < 24) || _day === 31)
